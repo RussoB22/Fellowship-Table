@@ -18,8 +18,7 @@ Clone the repo, "npm i", and have a functioning mysql.
 
 ## Usage
 Start your mysql, enter your .env information,  source the schema and seed. Then node server and pick what you want to do.
-<iframe width="560" height="315" src="https://www.youtube.com/embed/eK-dQid29bc" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-[![Alt text](https://img.youtube.com/vi/eK-dQid29bc/0.jpg)](https://www.youtube.com/watch?v=eK-dQid29bc)
+Usage video link: https://youtu.be/eK-dQid29bc
 
 
 
