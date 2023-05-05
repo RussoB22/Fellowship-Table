@@ -36,6 +36,13 @@ inquirer
         'Add a role',
         'Add an employee',
         'Update an employee role',
+        'Update employee manager',
+        'View employees by manager',
+        'View employees by department',
+        'Delete department',
+        'Delete role',
+        'Delete employee',
+        'View total utilized budget of a department',
         'Exit',
       ],
     },
@@ -211,6 +218,112 @@ inquirer
         db.end();
         mainMenu();
         break;
+      case 'Update employee manager':
+      db.query('SELECT id, first_name, last_name FROM employee_table;', (err, results) => {
+        if (err) {
+          console.error('Error retrieving employees:', err);
+          db.end();
+        } else {
+          inquirer.prompt([
+            {
+              type: 'list',
+              name: 'employee_id',
+              message: 'Select an employee to update:',
+              choices: results.map((employee) => ({
+                name: `${employee.first_name} ${employee.last_name}`,
+                value: employee.id
+              }))
+            },
+            {
+              type: 'input',
+              name: 'manager_id',
+              message: 'Enter the new manager id for the employee:'
+            }
+          ]).then((answers) => {
+            db.query('UPDATE employee_table SET manager_id = ? WHERE id = ?;', [answers.manager_id, answers.employee_id], (err, results) => {
+              if (err) {
+                console.error('Error updating employee manager:', err);
+              } else {
+                console.log('Employee manager updated successfully.');
+              }
+              db.end();
+              mainMenu();
+            });
+          });
+        }
+      });
+      break;
+    case 'View employees by manager':
+      db.query('SELECT manager.id AS manager_id, manager.first_name AS manager_first_name, manager.last_name AS manager_last_name, employee.id AS employee_id, employee.first_name AS employee_first_name, employee.last_name AS employee_last_name FROM employee_table employee INNER JOIN employee_table manager ON manager.id = employee.manager_id ORDER BY manager_last_name, manager_first_name, employee_last_name, employee_first_name;', (err, results) => {
+        if (err) {
+          console.error('Error retrieving employees by manager:', err);
+        } else {
+          console.table(results);
+        }
+        db.end();
+        mainMenu();
+      });
+      break;
+    case 'View employees by department':
+      db.query('SELECT department.id AS department_id, department.name AS department_name, employee.id AS employee_id, employee.first_name AS employee_first_name, employee.last_name AS employee_last_name, role.title AS employee_title FROM employee_table employee INNER JOIN role_table role ON employee.role_id = role.id INNER JOIN department_table department ON role.department_id = department.id ORDER BY department_name, employee_last_name, employee_first_name;', (err, results) => {
+        if (err) {
+          console.error('Error retrieving employees by department:', err);
+        } else {
+          console.table(results);
+        }
+        db.end();
+        mainMenu();
+      });
+      break;
+    case 'Delete department':
+      inquirer.prompt([
+        {
+          type: 'input',
+          name: 'department_id',
+          message: 'Enter the id of the department to delete:'
+        }
+      ]).then((answers) => {
+        db.query('DELETE FROM department_table WHERE id = ?;', [answers.department_id], (err, results) => {
+          if (err) {
+            console.error('Error deleting department:', err);
+          } else {
+            console.log('Department deleted successfully.');
+          }
+          db.end();
+          mainMenu();
+        });
+      });
+      break;
+      case 'Delete role':
+        inquirer.prompt([
+          {
+            type: 'input',
+            name: 'role_id',
+            message: 'Enter the id of the role to delete:'
+          }
+        ]).then((answers) => {
+          db.query('DELETE FROM role_table WHERE id = ?;', [answers.role_id], (err, results) => {
+            if (err) {
+              console.error('Error deleting role:', err);
+            } else {
+              console.log('Role deleted successfully.');
+            }
+            db.end();
+            mainMenu();
+          });
+        });
+        break;
+        case 'View total utilized budget of a department':
+  db.query('SELECT department_table.name AS department, SUM(role_table.salary) AS total_budget FROM employee_table INNER JOIN role_table ON employee_table.role_id = role_table.id INNER JOIN department_table ON role_table.department_id = department_table.id GROUP BY department_table.id;', (err, results) => {
+    if (err) {
+      console.error('Error retrieving department budgets:', err);
+    } else {
+      console.table(results);
+    }
+    db.end();
+    mainMenu();
+  });
+  break;
     }
   })
 };
